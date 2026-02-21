@@ -3,7 +3,7 @@
  * Plugin Name:       Cobro Fácil
  * Plugin URI:        https://github.com/Alecsiomatic/cobro-facil
  * Description:       Sistema de acceso seguro a entradas con código de 6 dígitos y envío por WhatsApp.
- * Version:           2.5.0
+ * Version:           2.6.0
  * Author:            Alecsiomatic
  * Author URI:        https://github.com/Alecsiomatic
  * License:           GPL-2.0+
@@ -23,7 +23,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-define( 'COBRO_FACIL_VERSION', '2.5.0' );
+define( 'COBRO_FACIL_VERSION', '2.6.0' );
 define( 'COBRO_FACIL_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'COBRO_FACIL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -544,12 +544,13 @@ function cobro_facil_thankyou_content( $order_id ) {
     $phone = $order->get_billing_phone();
     $access_url = site_url( '/mi-entrada' );
     
-    // Mensaje para WhatsApp (con saltos de línea correctos)
-    $whatsapp_message = "🎟️ *Ticket to Ride - Mi Entrada*" . "\n\n";
-    $whatsapp_message .= "Tu código de acceso: *{$code}*" . "\n\n";
-    $whatsapp_message .= "📱 Accede a tu entrada aquí:" . "\n";
-    $whatsapp_message .= $access_url . "\n\n";
-    $whatsapp_message .= "Guarda este mensaje para acceder a tu QR cuando lo necesites.";
+    // Mensaje para WhatsApp - Construir URL manualmente para asegurar saltos de línea
+    $nl = '%0A'; // Salto de línea para WhatsApp
+    $whatsapp_text = "🎟️ *Ticket to Ride - Mi Entrada*{$nl}{$nl}";
+    $whatsapp_text .= "Tu código de acceso: *{$code}*{$nl}{$nl}";
+    $whatsapp_text .= "📱 Accede a tu entrada aquí:{$nl}";
+    $whatsapp_text .= rawurlencode( $access_url ) . "{$nl}{$nl}";
+    $whatsapp_text .= rawurlencode( "Guarda este mensaje para acceder a tu QR cuando lo necesites." );
     
     // Formatear número para wa.me (quitar espacios, guiones, etc)
     $phone_clean = preg_replace( '/[^0-9]/', '', $phone );
@@ -559,32 +560,44 @@ function cobro_facil_thankyou_content( $order_id ) {
         $phone_clean = '52' . $phone_clean;
     }
     
-    $whatsapp_url = 'https://wa.me/' . $phone_clean . '?text=' . rawurlencode( $whatsapp_message );
+    $whatsapp_url = 'https://wa.me/' . $phone_clean . '?text=' . $whatsapp_text;
     
     // Cargar estilos
     wp_enqueue_style( 'cobro-facil-styles', COBRO_FACIL_PLUGIN_URL . 'assets/css/cobro-facil.css', array(), COBRO_FACIL_VERSION );
     
     ?>
     <div class="cobro-facil-thankyou-box">
-        <div class="cobro-facil-icon">🎟️</div>
+        <div class="cobro-facil-icon">✓</div>
         <h2>¡Compra exitosa!</h2>
+        <p class="cobro-facil-subtitle">Ahora envía tu entrada a WhatsApp</p>
         
-        <div class="cobro-facil-code-section">
-            <p class="cobro-facil-label">Tu código de acceso:</p>
-            <div class="cobro-facil-code"><?php echo esc_html( $code ); ?></div>
+        <div class="cobro-facil-steps">
+            <div class="cobro-facil-step">
+                <span class="step-number">1</span>
+                <span class="step-text">Presiona el botón verde para enviarte el código a tu WhatsApp</span>
+            </div>
+            <div class="cobro-facil-step">
+                <span class="step-number">2</span>
+                <span class="step-text">Abre el link que recibirás en el mensaje</span>
+            </div>
+            <div class="cobro-facil-step">
+                <span class="step-number">3</span>
+                <span class="step-text">Ingresa tu código de 6 dígitos para ver tu QR</span>
+            </div>
         </div>
         
-        <a href="<?php echo esc_url( $whatsapp_url ); ?>" target="_blank" class="cobro-facil-whatsapp-btn">
+        <div class="cobro-facil-code-section">
+            <p class="cobro-facil-label">Tu código:</p>
+            <div class="cobro-facil-code"><?php echo esc_html( $code ); ?></div>
+            <p class="cobro-facil-code-note">Este código NO es tu entrada. Úsalo para acceder a tu QR.</p>
+        </div>
+        
+        <a href="<?php echo esc_attr( $whatsapp_url ); ?>" target="_blank" class="cobro-facil-whatsapp-btn">
             <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
             </svg>
             Enviar a mi WhatsApp
         </a>
-        
-        <p class="cobro-facil-note">
-            Guarda este código para acceder a tu entrada cuando quieras en:<br>
-            <a href="<?php echo esc_url( $access_url ); ?>"><?php echo esc_html( $access_url ); ?></a>
-        </p>
     </div>
     <?php
 }
