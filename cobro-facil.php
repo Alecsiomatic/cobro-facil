@@ -3,7 +3,7 @@
  * Plugin Name:       Cobro Fácil
  * Plugin URI:        https://github.com/Alecsiomatic/cobro-facil
  * Description:       Sistema de acceso seguro a entradas con código de 6 dígitos y envío por WhatsApp.
- * Version:           2.3.0
+ * Version:           2.4.0
  * Author:            Alecsiomatic
  * Author URI:        https://github.com/Alecsiomatic
  * License:           GPL-2.0+
@@ -23,7 +23,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-define( 'COBRO_FACIL_VERSION', '2.3.0' );
+define( 'COBRO_FACIL_VERSION', '2.4.0' );
 define( 'COBRO_FACIL_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'COBRO_FACIL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -100,11 +100,125 @@ add_filter( 'woocommerce_billing_fields', 'cobro_facil_remove_default_required_f
 /**
  * No requerir email ni dirección para checkout virtual.
  */
-function cobro_facil_no_address_validation( $needs_address, $hide, $product ) {
-    return false;
-}
 add_filter( 'woocommerce_cart_needs_shipping_address', '__return_false' );
 add_filter( 'woocommerce_cart_needs_billing_address', '__return_false' );
+
+/**
+ * Para WooCommerce Blocks: Establecer valores por defecto antes de validar.
+ */
+function cobro_facil_set_default_checkout_data( $data ) {
+    // Valores por defecto para campos ocultos
+    $defaults = array(
+        'billing_last_name'  => '-',
+        'billing_company'    => '',
+        'billing_address_1'  => 'N/A',
+        'billing_address_2'  => '',
+        'billing_city'       => 'Ciudad',
+        'billing_state'      => '',
+        'billing_postcode'   => '00000',
+        'billing_country'    => 'MX',
+    );
+    
+    foreach ( $defaults as $key => $value ) {
+        if ( empty( $data[ $key ] ) ) {
+            $data[ $key ] = $value;
+        }
+    }
+    
+    // Email temporal basado en teléfono
+    if ( empty( $data['billing_email'] ) ) {
+        $phone = isset( $data['billing_phone'] ) ? preg_replace( '/[^0-9]/', '', $data['billing_phone'] ) : time();
+        $data['billing_email'] = 'guest_' . $phone . '@ticketoride.com';
+    }
+    
+    return $data;
+}
+add_filter( 'woocommerce_checkout_posted_data', 'cobro_facil_set_default_checkout_data', 5 );
+
+/**
+ * Para Store API (Blocks): Modificar datos antes de crear orden.
+ */
+function cobro_facil_modify_store_api_data( $request ) {
+    $body = $request->get_json_params();
+    
+    if ( isset( $body['billing_address'] ) ) {
+        $defaults = array(
+            'last_name'  => '-',
+            'company'    => '',
+            'address_1'  => 'N/A',
+            'address_2'  => '',
+            'city'       => 'Ciudad',
+            'state'      => '',
+            'postcode'   => '00000',
+            'country'    => 'MX',
+        );
+        
+        foreach ( $defaults as $key => $value ) {
+            if ( empty( $body['billing_address'][ $key ] ) ) {
+                $body['billing_address'][ $key ] = $value;
+            }
+        }
+        
+        // Email temporal
+        if ( empty( $body['billing_address']['email'] ) ) {
+            $phone = isset( $body['billing_address']['phone'] ) ? preg_replace( '/[^0-9]/', '', $body['billing_address']['phone'] ) : time();
+            $body['billing_address']['email'] = 'guest_' . $phone . '@ticketoride.com';
+        }
+        
+        $request->set_body( wp_json_encode( $body ) );
+    }
+    
+    return $request;
+}
+
+/**
+ * Hook para modificar validación de Store API.
+ */
+function cobro_facil_store_api_checkout_update_customer( $customer, $request ) {
+    // Establecer valores por defecto en el customer
+    if ( ! $customer->get_billing_last_name() ) {
+        $customer->set_billing_last_name( '-' );
+    }
+    if ( ! $customer->get_billing_address_1() ) {
+        $customer->set_billing_address_1( 'N/A' );
+    }
+    if ( ! $customer->get_billing_city() ) {
+        $customer->set_billing_city( 'Ciudad' );
+    }
+    if ( ! $customer->get_billing_postcode() ) {
+        $customer->set_billing_postcode( '00000' );
+    }
+    if ( ! $customer->get_billing_country() ) {
+        $customer->set_billing_country( 'MX' );
+    }
+    if ( ! $customer->get_billing_email() ) {
+        $phone = $customer->get_billing_phone() ?: time();
+        $customer->set_billing_email( 'guest_' . preg_replace( '/[^0-9]/', '', $phone ) . '@ticketoride.com' );
+    }
+    
+    return $customer;
+}
+add_filter( 'woocommerce_store_api_checkout_update_customer_from_request', 'cobro_facil_store_api_checkout_update_customer', 10, 2 );
+
+/**
+ * Remover validaciones de campos para checkout de bloques.
+ */
+function cobro_facil_remove_fields_validation( $fields ) {
+    $optional_fields = array(
+        'billing_last_name', 'billing_company', 'billing_address_1', 
+        'billing_address_2', 'billing_city', 'billing_state', 
+        'billing_postcode', 'billing_country', 'billing_email'
+    );
+    
+    foreach ( $optional_fields as $field ) {
+        if ( isset( $fields[ $field ] ) ) {
+            $fields[ $field ]['required'] = false;
+        }
+    }
+    
+    return $fields;
+}
+add_filter( 'woocommerce_default_address_fields', 'cobro_facil_remove_fields_validation', 9999 );
 
 /**
  * Generar email temporal si no se proporciona (WooCommerce lo requiere).
@@ -218,6 +332,23 @@ function cobro_facil_checkout_styles() {
         
         <script>
         (function() {
+            // Valores por defecto para campos ocultos
+            var defaultValues = {
+                'last_name': '-',
+                'last-name': '-',
+                'company': '',
+                'address_1': 'N/A',
+                'address-1': 'N/A',
+                'address_2': '',
+                'address-2': '',
+                'city': 'Ciudad',
+                'state': '',
+                'postcode': '00000',
+                'postal': '00000',
+                'country': 'MX',
+                'email': 'guest_' + Date.now() + '@ticketoride.com'
+            };
+            
             function setupCheckoutFields() {
                 // Lista de campos a OCULTAR
                 var fieldsToHide = [
@@ -257,10 +388,55 @@ function cobro_facil_checkout_styles() {
                     return false;
                 }
                 
-                // Procesar todos los inputs y sus contenedores
-                var allInputs = document.querySelectorAll('.wc-block-components-text-input, .form-row, .wc-block-components-country-input, .wc-block-components-state-input');
+                // Encontrar y llenar campos con valores por defecto
+                function fillHiddenFields() {
+                    var allInputs = document.querySelectorAll('input, select');
+                    allInputs.forEach(function(input) {
+                        var id = (input.id || '').toLowerCase();
+                        var name = (input.name || '').toLowerCase();
+                        var text = id + ' ' + name;
+                        
+                        // No modificar nombre o teléfono
+                        for (var i = 0; i < fieldsToShow.length; i++) {
+                            if (text.indexOf(fieldsToShow[i]) !== -1) {
+                                return;
+                            }
+                        }
+                        
+                        // Llenar con valores por defecto si está vacío
+                        for (var key in defaultValues) {
+                            if (text.indexOf(key) !== -1 && !input.value) {
+                                // Disparar evento de cambio para que React lo detecte
+                                var nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+                                if (input.tagName === 'INPUT' && nativeInputValueSetter) {
+                                    nativeInputValueSetter.call(input, defaultValues[key]);
+                                } else {
+                                    input.value = defaultValues[key];
+                                }
+                                input.dispatchEvent(new Event('input', { bubbles: true }));
+                                input.dispatchEvent(new Event('change', { bubbles: true }));
+                                break;
+                            }
+                        }
+                    });
+                    
+                    // Para select de país
+                    var countrySelects = document.querySelectorAll('select[id*="country"], select[name*="country"]');
+                    countrySelects.forEach(function(select) {
+                        if (!select.value || select.value === '') {
+                            var mxOption = select.querySelector('option[value="MX"]');
+                            if (mxOption) {
+                                select.value = 'MX';
+                                select.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        }
+                    });
+                }
                 
-                allInputs.forEach(function(container) {
+                // Procesar todos los inputs y sus contenedores
+                var allContainers = document.querySelectorAll('.wc-block-components-text-input, .form-row, .wc-block-components-country-input, .wc-block-components-state-input');
+                
+                allContainers.forEach(function(container) {
                     if (shouldShow(container)) {
                         container.style.display = 'block';
                         container.style.visibility = 'visible';
@@ -285,6 +461,9 @@ function cobro_facil_checkout_styles() {
                         el.style.display = 'none';
                     });
                 });
+                
+                // Llenar campos ocultos con valores por defecto
+                fillHiddenFields();
             }
             
             // Ejecutar cuando el DOM esté listo
