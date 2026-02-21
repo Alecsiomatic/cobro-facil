@@ -3,7 +3,7 @@
  * Plugin Name:       Cobro Fácil
  * Plugin URI:        https://github.com/Alecsiomatic/cobro-facil
  * Description:       Sistema de acceso seguro a entradas con código de 6 dígitos y envío por WhatsApp.
- * Version:           2.0.0
+ * Version:           2.2.0
  * Author:            Alecsiomatic
  * Author URI:        https://github.com/Alecsiomatic
  * License:           GPL-2.0+
@@ -23,7 +23,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-define( 'COBRO_FACIL_VERSION', '2.1.0' );
+define( 'COBRO_FACIL_VERSION', '2.2.0' );
 define( 'COBRO_FACIL_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'COBRO_FACIL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -121,18 +121,93 @@ add_action( 'woocommerce_after_checkout_validation', 'cobro_facil_generate_guest
 
 /**
  * Estilos adicionales para checkout simplificado.
+ * Funciona tanto en checkout clásico como en checkout de bloques.
  */
 function cobro_facil_checkout_styles() {
     if ( is_checkout() ) {
         ?>
         <style>
-            /* Ocultar campos que puedan quedar */
-            .woocommerce-billing-fields__field-wrapper .form-row:not(.form-row-wide) {
-                width: 100% !important;
-                float: none !important;
+            /* =============================================
+               CHECKOUT DE BLOQUES (WooCommerce Blocks)
+               ============================================= */
+            
+            /* Ocultar sección de email/contacto completa */
+            .wc-block-checkout__contact-fields,
+            .wp-block-woocommerce-checkout-contact-information-block,
+            .wc-block-components-checkout-step:has(.wc-block-components-text-input input[type="email"]) {
+                display: none !important;
             }
             
-            /* Checkout más limpio */
+            /* Ocultar TODOS los campos de dirección en bloques */
+            .wc-block-checkout__billing-fields .wc-block-components-address-form > *:not(:first-child):not(:nth-child(2)),
+            .wc-block-checkout__billing-fields .wc-block-components-country-input,
+            .wc-block-checkout__billing-fields .wc-block-components-state-input,
+            .wc-block-checkout__billing-fields [id*="billing-address"],
+            .wc-block-checkout__billing-fields [id*="billing-city"],
+            .wc-block-checkout__billing-fields [id*="billing-state"],
+            .wc-block-checkout__billing-fields [id*="billing-postcode"],
+            .wc-block-checkout__billing-fields [id*="billing-country"],
+            .wc-block-checkout__billing-fields [id*="billing-company"],
+            .wc-block-checkout__billing-fields [id*="last-name"],
+            .wc-block-checkout__billing-fields [id*="address_1"],
+            .wc-block-checkout__billing-fields [id*="address_2"],
+            .wc-block-components-address-form__address_1,
+            .wc-block-components-address-form__address_2,
+            .wc-block-components-address-form__city,
+            .wc-block-components-address-form__state,
+            .wc-block-components-address-form__postcode,
+            .wc-block-components-address-form__country,
+            .wc-block-components-address-form__company,
+            .wc-block-components-address-form__last_name {
+                display: none !important;
+            }
+            
+            /* Ocultar específicamente por class parcial */
+            [class*="address_1"],
+            [class*="address_2"],
+            [class*="address-line"],
+            [class*="city"],
+            [class*="postcode"],
+            [class*="postal-code"],
+            [class*="country"],
+            [class*="state"],
+            [class*="company"],
+            [class*="last-name"],
+            [class*="last_name"],
+            [class*="email"] {
+                display: none !important;
+            }
+            
+            /* Mostrar solo nombre y teléfono */
+            [class*="first-name"],
+            [class*="first_name"],
+            [class*="phone"] {
+                display: block !important;
+            }
+            
+            /* Ocultar shipping */
+            .wc-block-checkout__shipping-fields,
+            .wp-block-woocommerce-checkout-shipping-address-block,
+            .wc-block-checkout__shipping-option,
+            .wc-block-components-shipping-address,
+            #shipping-fields,
+            .wc-block-checkout__actions-row [class*="shipping"],
+            [id*="shipping"] {
+                display: none !important;
+            }
+            
+            /* Ocultar notas del pedido */
+            .wc-block-checkout__add-note,
+            .wc-block-components-checkout-order-note,
+            [class*="order-note"],
+            [class*="order-comments"] {
+                display: none !important;
+            }
+            
+            /* =============================================
+               CHECKOUT CLÁSICO (Shortcode)
+               ============================================= */
+            
             #billing_email_field,
             #billing_last_name_field,
             #billing_company_field,
@@ -144,11 +219,20 @@ function cobro_facil_checkout_styles() {
             #billing_postcode_field,
             #order_comments_field,
             .woocommerce-shipping-fields,
-            #ship-to-different-address {
+            #ship-to-different-address,
+            .woocommerce-additional-fields {
                 display: none !important;
             }
             
-            /* Estilo para los campos visibles */
+            /* Campos visibles - estilo mejorado */
+            #billing_first_name_field,
+            #billing_phone_field,
+            .wc-block-components-text-input:has([id*="first-name"]),
+            .wc-block-components-text-input:has([id*="phone"]) {
+                display: block !important;
+            }
+            
+            /* Estilo para los campos en checkout clásico */
             .woocommerce-checkout #billing_first_name,
             .woocommerce-checkout #billing_phone {
                 padding: 15px;
@@ -162,17 +246,72 @@ function cobro_facil_checkout_styles() {
                 border-color: #667eea;
                 outline: none;
             }
-            
-            /* Título de sección */
-            .woocommerce-billing-fields h3 {
-                font-size: 20px;
-                margin-bottom: 20px;
-            }
         </style>
+        
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Función para ocultar campos no deseados (más agresivo)
+            function hideUnwantedFields() {
+                // Selectores de campos a ocultar
+                var hideSelectors = [
+                    '[id*="email"]',
+                    '[id*="last-name"]', '[id*="last_name"]',
+                    '[id*="address"]', '[id*="address_1"]', '[id*="address_2"]',
+                    '[id*="city"]',
+                    '[id*="state"]',
+                    '[id*="postcode"]', '[id*="postal"]',
+                    '[id*="country"]',
+                    '[id*="company"]',
+                    '[class*="shipping"]',
+                    '[class*="address_1"]', '[class*="address_2"]',
+                    '[class*="city"]', '[class*="postcode"]',
+                    '[class*="country"]', '[class*="state"]',
+                    '[class*="company"]', '[class*="last"]',
+                    '.wc-block-checkout__contact-fields',
+                    '.wc-block-components-checkout-order-note'
+                ];
+                
+                hideSelectors.forEach(function(selector) {
+                    document.querySelectorAll(selector).forEach(function(el) {
+                        // No ocultar si es nombre o teléfono
+                        var id = el.id || '';
+                        var className = el.className || '';
+                        if (id.includes('first') || id.includes('phone') ||
+                            className.includes('first') || className.includes('phone')) {
+                            return;
+                        }
+                        // Buscar el contenedor padre del campo
+                        var parent = el.closest('.wc-block-components-text-input') || 
+                                     el.closest('.form-row') ||
+                                     el.closest('.wc-block-components-checkout-step') ||
+                                     el;
+                        if (parent) {
+                            parent.style.display = 'none';
+                        }
+                    });
+                });
+            }
+            
+            // Ejecutar inmediatamente
+            hideUnwantedFields();
+            
+            // Ejecutar cada segundo por si WooCommerce regenera campos
+            setInterval(hideUnwantedFields, 1000);
+            
+            // Observer para detectar cambios en el DOM
+            var observer = new MutationObserver(hideUnwantedFields);
+            var checkoutForm = document.querySelector('.wc-block-checkout') || 
+                               document.querySelector('.woocommerce-checkout');
+            if (checkoutForm) {
+                observer.observe(checkoutForm, { childList: true, subtree: true });
+            }
+        });
+        </script>
         <?php
     }
 }
-add_action( 'wp_head', 'cobro_facil_checkout_styles' );
+add_action( 'wp_head', 'cobro_facil_checkout_styles', 999 );
+add_action( 'wp_footer', 'cobro_facil_checkout_styles', 999 );
 
 // =============================================================================
 // 1. GENERAR CÓDIGO DE 6 DÍGITOS AL COMPLETAR PEDIDO
