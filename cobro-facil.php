@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name:       Cobro Fácil
- * Plugin URI:        https://github.com/longevai/cobro-facil
+ * Plugin URI:        https://github.com/Alecsiomatic/cobro-facil
  * Description:       Personaliza y mejora el checkout de WooCommerce para una experiencia de pago más sencilla.
  * Version:           1.0.0
- * Author:            Longevai
- * Author URI:        https://github.com/longevai
+ * Author:            Alecsiomatic
+ * Author URI:        https://github.com/Alecsiomatic
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       cobro-facil
@@ -15,8 +15,8 @@
  * WC requires at least: 5.0
  * WC tested up to:   8.0
  *
- * GitHub Plugin URI: longevai/cobro-facil
- * GitHub Plugin URI: https://github.com/longevai/cobro-facil
+ * GitHub Plugin URI: Alecsiomatic/cobro-facil
+ * GitHub Plugin URI: https://github.com/Alecsiomatic/cobro-facil
  * Primary Branch:    main
  * Release Asset:     true
  */

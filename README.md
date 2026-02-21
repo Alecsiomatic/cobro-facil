@@ -27,7 +27,7 @@ Plugin de WordPress para personalizar y mejorar el checkout de WooCommerce.
 ### Método 2: Con Git Updater
 1. Instala y activa [Git Updater](https://git-updater.com/)
 2. Ve a Settings > Git Updater > Install Plugin
-3. Ingresa: `longevai/cobro-facil`
+3. Ingresa: `Alecsiomatic/cobro-facil`
 4. Haz clic en "Install Plugin"
 
 ## Configuración de Git Updater
@@ -36,7 +36,7 @@ Este plugin está preparado para actualizaciones automáticas mediante Git Updat
 
 ### Headers incluidos:
 ```php
-GitHub Plugin URI: longevai/cobro-facil
+GitHub Plugin URI: Alecsiomatic/cobro-facil
 Primary Branch:    main
 Release Asset:     true
 ```
@@ -114,4 +114,4 @@ GPL-2.0+
 
 ## Autor
 
-Longevai - [GitHub](https://github.com/longevai)
+Alecsiomatic - [GitHub](https://github.com/Alecsiomatic)
