@@ -3,7 +3,7 @@
  * Plugin Name:       Cobro Fácil
  * Plugin URI:        https://github.com/Alecsiomatic/cobro-facil
  * Description:       Sistema de acceso seguro a entradas con código de 6 dígitos y envío por WhatsApp.
- * Version:           2.6.0
+ * Version:           2.7.0
  * Author:            Alecsiomatic
  * Author URI:        https://github.com/Alecsiomatic
  * License:           GPL-2.0+
@@ -23,7 +23,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-define( 'COBRO_FACIL_VERSION', '2.6.0' );
+define( 'COBRO_FACIL_VERSION', '2.7.0' );
 define( 'COBRO_FACIL_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'COBRO_FACIL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -721,10 +721,41 @@ function cobro_facil_validate_code() {
     
     $html .= '<div class="cobro-facil-ticket-details">' . $items_html . '</div>';
     
-    $html .= '<button onclick="window.print()" class="cobro-facil-print-btn">🖨️ Imprimir entrada</button>';
+    $html .= '<button onclick="cobroFacilPrint()" class="cobro-facil-print-btn">🖨️ Imprimir entrada</button>';
     $html .= '<button onclick="location.reload()" class="cobro-facil-back-btn">← Volver</button>';
     
     $html .= '</div>';
+    
+    // Script para imprimir solo el boleto
+    $html .= '<script>
+    function cobroFacilPrint() {
+        var printContent = document.querySelector(".cobro-facil-entry-result").cloneNode(true);
+        // Remover botones del contenido a imprimir
+        var buttons = printContent.querySelectorAll("button");
+        buttons.forEach(function(btn) { btn.remove(); });
+        
+        var printWindow = window.open("", "_blank");
+        printWindow.document.write("<!DOCTYPE html><html><head><title>Mi Entrada - Ticket to Ride</title>");
+        printWindow.document.write("<style>");
+        printWindow.document.write("body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }");
+        printWindow.document.write("h2 { color: #667eea; margin-bottom: 10px; }");
+        printWindow.document.write(".cobro-facil-order-number { color: #666; margin-bottom: 20px; }");
+        printWindow.document.write(".cobro-facil-qr img { max-width: 300px; margin: 20px auto; display: block; }");
+        printWindow.document.write(".cobro-facil-cover img { max-width: 100%; max-height: 200px; object-fit: cover; margin-bottom: 20px; }");
+        printWindow.document.write(".cobro-facil-ticket-item { background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 8px; text-align: left; }");
+        printWindow.document.write(".cobro-facil-ticket-item h4 { margin: 0 0 10px 0; color: #333; }");
+        printWindow.document.write(".cobro-facil-ticket-item p { margin: 5px 0; color: #555; }");
+        printWindow.document.write("</style></head><body>");
+        printWindow.document.write(printContent.innerHTML);
+        printWindow.document.write("</body></html>");
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(function() {
+            printWindow.print();
+            printWindow.close();
+        }, 250);
+    }
+    </script>';
 
     wp_send_json_success( array( 'html' => $html ) );
 }
