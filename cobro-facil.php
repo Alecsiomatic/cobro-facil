@@ -3,7 +3,7 @@
  * Plugin Name:       Cobro Fácil
  * Plugin URI:        https://github.com/Alecsiomatic/cobro-facil
  * Description:       Sistema de acceso seguro a entradas con código de 6 dígitos y envío por WhatsApp.
- * Version:           2.7.1
+ * Version:           2.8.0
  * Author:            Alecsiomatic
  * Author URI:        https://github.com/Alecsiomatic
  * License:           GPL-2.0+
@@ -23,7 +23,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-define( 'COBRO_FACIL_VERSION', '2.7.1' );
+define( 'COBRO_FACIL_VERSION', '2.8.0' );
 define( 'COBRO_FACIL_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'COBRO_FACIL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -721,75 +721,10 @@ function cobro_facil_validate_code() {
     
     $html .= '<div class="cobro-facil-ticket-details">' . $items_html . '</div>';
     
-    $html .= '<button onclick="cobroFacilPrint()" class="cobro-facil-print-btn">🖨️ Imprimir entrada</button>';
+    $html .= '<p class="cobro-facil-screenshot-note">📸 Toma una captura de pantalla de tu QR y muéstrala en el acceso del evento</p>';
     $html .= '<button onclick="location.reload()" class="cobro-facil-back-btn">← Volver</button>';
     
     $html .= '</div>';
-    
-    // Script para imprimir solo el boleto
-    $html .= '<script>
-    function cobroFacilPrint() {
-        var printContent = document.querySelector(".cobro-facil-entry-result").cloneNode(true);
-        // Remover botones del contenido a imprimir
-        var buttons = printContent.querySelectorAll("button");
-        buttons.forEach(function(btn) { btn.remove(); });
-        
-        // Obtener URLs de imágenes originales
-        var originalImages = document.querySelectorAll(".cobro-facil-entry-result img");
-        var imageSources = [];
-        originalImages.forEach(function(img) {
-            imageSources.push(img.src);
-        });
-        
-        var printWindow = window.open("", "_blank", "width=800,height=600");
-        var doc = printWindow.document;
-        
-        doc.open();
-        doc.write("<!DOCTYPE html>");
-        doc.write("<html><head><title>Mi Entrada - Ticket to Ride</title>");
-        doc.write("<style>");
-        doc.write("body { font-family: Arial, sans-serif; padding: 20px; text-align: center; margin: 0; }");
-        doc.write("h2 { color: #667eea; margin-bottom: 10px; font-size: 24px; }");
-        doc.write(".cobro-facil-order-number { color: #666; margin-bottom: 20px; }");
-        doc.write(".cobro-facil-qr { margin: 20px auto; }");
-        doc.write(".cobro-facil-qr img { max-width: 280px; height: auto; }");
-        doc.write(".cobro-facil-cover { margin-bottom: 20px; }");
-        doc.write(".cobro-facil-cover img { max-width: 100%; max-height: 180px; object-fit: cover; }");
-        doc.write(".cobro-facil-ticket-item { background: #f5f5f5; padding: 15px; margin: 10px auto; border-radius: 8px; text-align: left; max-width: 400px; }");
-        doc.write(".cobro-facil-ticket-item h4 { margin: 0 0 10px 0; color: #333; }");
-        doc.write(".cobro-facil-ticket-item p { margin: 5px 0; color: #555; font-size: 14px; }");
-        doc.write(".cobro-facil-ticket-details { margin-top: 20px; }");
-        doc.write("</style></head><body>");
-        doc.write(printContent.innerHTML);
-        doc.write("</body></html>");
-        doc.close();
-        
-        // Esperar a que las imágenes se carguen
-        var images = doc.images;
-        var loaded = 0;
-        var total = images.length;
-        
-        if (total === 0) {
-            setTimeout(function() { printWindow.print(); }, 100);
-        } else {
-            for (var i = 0; i < total; i++) {
-                images[i].onload = images[i].onerror = function() {
-                    loaded++;
-                    if (loaded >= total) {
-                        setTimeout(function() { printWindow.print(); }, 100);
-                    }
-                };
-                // Forzar recarga de imagen
-                if (images[i].complete) {
-                    loaded++;
-                    if (loaded >= total) {
-                        setTimeout(function() { printWindow.print(); }, 100);
-                    }
-                }
-            }
-        }
-    }
-    </script>';
 
     wp_send_json_success( array( 'html' => $html ) );
 }

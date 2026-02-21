@@ -344,6 +344,17 @@
     background: #e0e0e0;
 }
 
+.cobro-facil-screenshot-note {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 20px 25px;
+    border-radius: 15px;
+    font-size: 16px;
+    font-weight: 500;
+    margin: 20px 0;
+    line-height: 1.5;
+}
+
 /* ============================================
    ESTILOS PARA IMPRESIÓN
    ============================================ */
