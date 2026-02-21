@@ -23,9 +23,156 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-define( 'COBRO_FACIL_VERSION', '2.0.0' );
+define( 'COBRO_FACIL_VERSION', '2.1.0' );
 define( 'COBRO_FACIL_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'COBRO_FACIL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+
+// =============================================================================
+// CHECKOUT SIMPLIFICADO: Solo nombre y teléfono
+// =============================================================================
+
+/**
+ * Simplificar campos del checkout - solo nombre y teléfono.
+ */
+function cobro_facil_simplify_checkout_fields( $fields ) {
+    // Campos a mantener
+    $keep_fields = array( 'billing_first_name', 'billing_phone' );
+    
+    // Remover todos los campos de billing excepto los que queremos
+    foreach ( $fields['billing'] as $key => $field ) {
+        if ( ! in_array( $key, $keep_fields ) ) {
+            unset( $fields['billing'][ $key ] );
+        }
+    }
+    
+    // Remover shipping y order comments
+    unset( $fields['shipping'] );
+    unset( $fields['order']['order_comments'] );
+    
+    // Asegurar que nombre y teléfono son obligatorios
+    if ( isset( $fields['billing']['billing_first_name'] ) ) {
+        $fields['billing']['billing_first_name']['required'] = true;
+        $fields['billing']['billing_first_name']['label'] = 'Nombre';
+        $fields['billing']['billing_first_name']['placeholder'] = 'Tu nombre';
+        $fields['billing']['billing_first_name']['class'] = array( 'form-row-wide' );
+        $fields['billing']['billing_first_name']['priority'] = 10;
+    }
+    
+    if ( isset( $fields['billing']['billing_phone'] ) ) {
+        $fields['billing']['billing_phone']['required'] = true;
+        $fields['billing']['billing_phone']['label'] = 'WhatsApp / Teléfono';
+        $fields['billing']['billing_phone']['placeholder'] = 'Ej: 55 1234 5678';
+        $fields['billing']['billing_phone']['class'] = array( 'form-row-wide' );
+        $fields['billing']['billing_phone']['priority'] = 20;
+    }
+    
+    return $fields;
+}
+add_filter( 'woocommerce_checkout_fields', 'cobro_facil_simplify_checkout_fields', 9999 );
+
+/**
+ * Remover campos de dirección requeridos por defecto.
+ */
+function cobro_facil_remove_default_required_fields( $fields ) {
+    // Lista de campos que WooCommerce marca como requeridos por defecto
+    $not_required = array(
+        'billing_last_name',
+        'billing_company',
+        'billing_address_1',
+        'billing_address_2',
+        'billing_city',
+        'billing_postcode',
+        'billing_country',
+        'billing_state',
+        'billing_email',
+    );
+    
+    foreach ( $not_required as $field ) {
+        if ( isset( $fields[ $field ] ) ) {
+            $fields[ $field ]['required'] = false;
+        }
+    }
+    
+    return $fields;
+}
+add_filter( 'woocommerce_billing_fields', 'cobro_facil_remove_default_required_fields', 9999 );
+
+/**
+ * No requerir email ni dirección para checkout virtual.
+ */
+function cobro_facil_no_address_validation( $needs_address, $hide, $product ) {
+    return false;
+}
+add_filter( 'woocommerce_cart_needs_shipping_address', '__return_false' );
+add_filter( 'woocommerce_cart_needs_billing_address', '__return_false' );
+
+/**
+ * Generar email temporal si no se proporciona (WooCommerce lo requiere).
+ */
+function cobro_facil_generate_guest_email( $data, $errors ) {
+    if ( empty( $data['billing_email'] ) ) {
+        // Generar email temporal basado en teléfono
+        $phone = isset( $data['billing_phone'] ) ? preg_replace( '/[^0-9]/', '', $data['billing_phone'] ) : time();
+        $data['billing_email'] = 'guest_' . $phone . '@ticketoride.com';
+        $_POST['billing_email'] = $data['billing_email'];
+    }
+}
+add_action( 'woocommerce_after_checkout_validation', 'cobro_facil_generate_guest_email', 10, 2 );
+
+/**
+ * Estilos adicionales para checkout simplificado.
+ */
+function cobro_facil_checkout_styles() {
+    if ( is_checkout() ) {
+        ?>
+        <style>
+            /* Ocultar campos que puedan quedar */
+            .woocommerce-billing-fields__field-wrapper .form-row:not(.form-row-wide) {
+                width: 100% !important;
+                float: none !important;
+            }
+            
+            /* Checkout más limpio */
+            #billing_email_field,
+            #billing_last_name_field,
+            #billing_company_field,
+            #billing_country_field,
+            #billing_address_1_field,
+            #billing_address_2_field,
+            #billing_city_field,
+            #billing_state_field,
+            #billing_postcode_field,
+            #order_comments_field,
+            .woocommerce-shipping-fields,
+            #ship-to-different-address {
+                display: none !important;
+            }
+            
+            /* Estilo para los campos visibles */
+            .woocommerce-checkout #billing_first_name,
+            .woocommerce-checkout #billing_phone {
+                padding: 15px;
+                font-size: 16px;
+                border-radius: 10px;
+                border: 2px solid #e0e0e0;
+            }
+            
+            .woocommerce-checkout #billing_first_name:focus,
+            .woocommerce-checkout #billing_phone:focus {
+                border-color: #667eea;
+                outline: none;
+            }
+            
+            /* Título de sección */
+            .woocommerce-billing-fields h3 {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+        </style>
+        <?php
+    }
+}
+add_action( 'wp_head', 'cobro_facil_checkout_styles' );
 
 // =============================================================================
 // 1. GENERAR CÓDIGO DE 6 DÍGITOS AL COMPLETAR PEDIDO
