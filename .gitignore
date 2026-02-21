@@ -1,0 +1,30 @@
+# WordPress specific
+wp-config.php
+wp-content/uploads/
+wp-content/upgrade/
+wp-content/backup-db/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+debug.log
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build files
+*.zip
+*.tar.gz
+
+# Cache
+.cache/
