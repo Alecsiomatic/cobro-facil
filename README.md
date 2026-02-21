@@ -1,38 +1,60 @@
 # Cobro Fácil
 
-Plugin de WordPress para personalizar y mejorar el checkout de WooCommerce.
+Sistema de acceso seguro a entradas con código de 6 dígitos y envío por WhatsApp para WooCommerce.
 
 ## Características
 
-- ✅ Personalización de campos del checkout
-- ✅ Reordenamiento de campos de facturación
-- ✅ Campos personalizados adicionales
-- ✅ Estilos modernos y responsivos
+- ✅ Genera código de acceso único de 6 dígitos por pedido
+- ✅ Botón para enviar código a WhatsApp del cliente
+- ✅ Página de acceso segura con validación de código
+- ✅ Compatible con QRCompleto para mostrar QR de entrada
+- ✅ Diseño moderno y responsive
 - ✅ Integración con Git Updater para actualizaciones automáticas
+
+## Flujo de uso
+
+1. **Cliente compra** (puede ser guest checkout)
+2. **Se genera código** de 6 dígitos automáticamente
+3. **Página "Gracias"** muestra código + botón WhatsApp
+4. **Cliente guarda** el código en su WhatsApp
+5. **Para ver entrada** → va a `/mi-entrada` e ingresa código
+6. **Ve su QR** y detalles del pedido
 
 ## Requisitos
 
 - WordPress 5.0+
 - WooCommerce 5.0+
 - PHP 7.4+
+- QRCompleto (opcional, para mostrar QR)
 
 ## Instalación
 
-### Método 1: Instalación manual
-1. Descarga el plugin como ZIP
-2. Ve a WordPress Admin > Plugins > Añadir nuevo > Subir plugin
-3. Selecciona el archivo ZIP y haz clic en "Instalar ahora"
-4. Activa el plugin
-
-### Método 2: Con Git Updater
+### Con Git Updater
 1. Instala y activa [Git Updater](https://git-updater.com/)
 2. Ve a Settings > Git Updater > Install Plugin
 3. Ingresa: `Alecsiomatic/cobro-facil`
 4. Haz clic en "Install Plugin"
 
-## Configuración de Git Updater
+### Manual
+1. Descarga el plugin como ZIP
+2. WordPress Admin > Plugins > Añadir nuevo > Subir plugin
+3. Activa el plugin
 
-Este plugin está preparado para actualizaciones automáticas mediante Git Updater.
+## Configuración
+
+El plugin crea automáticamente la página `/mi-entrada` al activarse.
+
+Si necesitas crearla manualmente:
+1. Crea una página con slug `mi-entrada`
+2. Agrega el shortcode: `[mi_entrada]`
+
+## Shortcodes
+
+| Shortcode | Descripción |
+|-----------|-------------|
+| `[mi_entrada]` | Formulario de acceso con código de 6 dígitos |
+
+## Git Updater
 
 ### Headers incluidos:
 ```php
@@ -40,73 +62,6 @@ GitHub Plugin URI: Alecsiomatic/cobro-facil
 Primary Branch:    main
 Release Asset:     true
 ```
-
-### Webhook para actualizaciones automáticas
-
-En tu repositorio de GitHub:
-1. Ve a Settings > Webhooks > Add webhook
-2. Payload URL: `https://ticketoride.com/wp-json/git-updater/v1/update/?key=974bff961fb4de8fdeb189dcf3828f36`
-3. Content type: `application/json`
-4. Selecciona: "Just the push event"
-5. Guarda el webhook
-
-### Endpoints disponibles:
-
-**Actualizar plugin:**
-```
-POST https://ticketoride.com/wp-json/git-updater/v1/update/?key=974bff961fb4de8fdeb189dcf3828f36
-```
-
-**Resetear a branch:**
-```
-POST https://ticketoride.com/wp-json/git-updater/v1/reset-branch/?key=974bff961fb4de8fdeb189dcf3828f36
-```
-
-## Desarrollo
-
-### Flujo de trabajo
-
-1. Haz cambios localmente
-2. Commit y push a GitHub:
-   ```bash
-   git add .
-   git commit -m "Descripción del cambio"
-   git push origin main
-   ```
-3. El webhook notificará automáticamente a tu sitio WordPress
-4. Git Updater descargará e instalará la actualización
-
-### Actualizar versión
-
-Para una nueva versión:
-1. Actualiza `Version: X.X.X` en `cobro-facil.php`
-2. Actualiza `COBRO_FACIL_VERSION` en `cobro-facil.php`
-3. Commit y push
-4. Opcionalmente, crea un Release en GitHub
-
-## Estructura del plugin
-
-```
-cobro-facil/
-├── cobro-facil.php          # Archivo principal del plugin
-├── includes/
-│   └── class-cobro-facil-checkout.php  # Clase de checkout
-├── assets/
-│   └── css/
-│       └── checkout.css     # Estilos del checkout
-└── README.md
-```
-
-## Hooks disponibles
-
-### Filtros
-- `woocommerce_checkout_fields` - Personalizar campos
-- `woocommerce_billing_fields` - Reordenar campos de facturación
-
-### Acciones
-- `woocommerce_after_checkout_billing_form` - Agregar campos personalizados
-- `woocommerce_checkout_process` - Validar campos
-- `woocommerce_checkout_update_order_meta` - Guardar datos del pedido
 
 ## Licencia
 

@@ -1,0 +1,359 @@
+/**
+ * Cobro Fácil - Estilos
+ */
+
+/* ============================================
+   PÁGINA "GRACIAS POR TU COMPRA"
+   ============================================ */
+
+.cobro-facil-thankyou-box {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 40px 30px;
+    text-align: center;
+    color: #fff;
+    margin: 30px 0;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+}
+
+.cobro-facil-icon {
+    font-size: 64px;
+    margin-bottom: 15px;
+}
+
+.cobro-facil-thankyou-box h2 {
+    color: #fff;
+    font-size: 28px;
+    margin: 0 0 25px 0;
+    font-weight: 600;
+}
+
+.cobro-facil-code-section {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 15px;
+    padding: 25px;
+    margin: 25px 0;
+}
+
+.cobro-facil-label {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 10px 0;
+    opacity: 0.9;
+}
+
+.cobro-facil-code {
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: 8px;
+    font-family: 'Courier New', monospace;
+    background: #fff;
+    color: #667eea;
+    padding: 15px 30px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.cobro-facil-whatsapp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #25D366;
+    color: #fff !important;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: 600;
+    text-decoration: none !important;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+.cobro-facil-whatsapp-btn:hover {
+    background: #128C7E;
+    transform: scale(1.05);
+    color: #fff !important;
+}
+
+.cobro-facil-whatsapp-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.cobro-facil-note {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-top: 25px;
+    line-height: 1.6;
+}
+
+.cobro-facil-note a {
+    color: #fff !important;
+    text-decoration: underline !important;
+}
+
+/* ============================================
+   PÁGINA DE ACCESO (MI ENTRADA)
+   ============================================ */
+
+.cobro-facil-access-container {
+    max-width: 450px;
+    margin: 50px auto;
+    padding: 0 20px;
+}
+
+#cobro-facil-form-section {
+    background: #fff;
+    border-radius: 20px;
+    padding: 50px 40px;
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.1);
+}
+
+#cobro-facil-form-section h2 {
+    color: #333;
+    font-size: 24px;
+    margin: 15px 0 10px 0;
+}
+
+#cobro-facil-form-section > p {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.cobro-facil-code-input-container {
+    margin-bottom: 20px;
+}
+
+#cobro-facil-code-input {
+    width: 100%;
+    max-width: 250px;
+    font-size: 36px;
+    text-align: center;
+    letter-spacing: 10px;
+    padding: 20px;
+    border: 3px solid #e0e0e0;
+    border-radius: 15px;
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    transition: border-color 0.3s ease;
+}
+
+#cobro-facil-code-input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+#cobro-facil-code-input::placeholder {
+    color: #ddd;
+}
+
+.cobro-facil-submit-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border: none;
+    padding: 18px 50px;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 300px;
+}
+
+.cobro-facil-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+.cobro-facil-submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.cobro-facil-error {
+    background: #fee;
+    color: #c00;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+    font-weight: 500;
+}
+
+/* ============================================
+   RESULTADO (QR Y DETALLES)
+   ============================================ */
+
+.cobro-facil-entry-result {
+    background: #fff;
+    border-radius: 20px;
+    padding: 40px 30px;
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.1);
+}
+
+.cobro-facil-cover {
+    margin: -40px -30px 20px -30px;
+    border-radius: 20px 20px 0 0;
+    overflow: hidden;
+}
+
+.cobro-facil-cover img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.cobro-facil-entry-result h2 {
+    color: #333;
+    font-size: 28px;
+    margin: 10px 0;
+}
+
+.cobro-facil-order-number {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.cobro-facil-qr {
+    margin: 25px 0;
+}
+
+.cobro-facil-qr img {
+    max-width: 250px;
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.cobro-facil-ticket-details {
+    text-align: left;
+    margin: 30px 0;
+}
+
+.cobro-facil-ticket-item {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.cobro-facil-ticket-item h4 {
+    color: #667eea;
+    margin: 0 0 10px 0;
+    font-size: 16px;
+}
+
+.cobro-facil-ticket-item p {
+    margin: 5px 0;
+    color: #555;
+    font-size: 14px;
+}
+
+.cobro-facil-ticket-item strong {
+    color: #333;
+}
+
+.cobro-facil-print-btn,
+.cobro-facil-back-btn {
+    display: inline-block;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 5px;
+    border: none;
+}
+
+.cobro-facil-print-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+}
+
+.cobro-facil-print-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+.cobro-facil-back-btn {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.cobro-facil-back-btn:hover {
+    background: #e0e0e0;
+}
+
+/* ============================================
+   ESTILOS PARA IMPRESIÓN
+   ============================================ */
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    
+    .cobro-facil-entry-result,
+    .cobro-facil-entry-result * {
+        visibility: visible;
+    }
+    
+    .cobro-facil-entry-result {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        box-shadow: none;
+    }
+    
+    .cobro-facil-print-btn,
+    .cobro-facil-back-btn {
+        display: none !important;
+    }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 480px) {
+    .cobro-facil-thankyou-box {
+        padding: 30px 20px;
+        margin: 20px 10px;
+    }
+    
+    .cobro-facil-code {
+        font-size: 32px;
+        letter-spacing: 5px;
+        padding: 12px 20px;
+    }
+    
+    .cobro-facil-icon {
+        font-size: 48px;
+    }
+    
+    #cobro-facil-form-section {
+        padding: 40px 25px;
+    }
+    
+    #cobro-facil-code-input {
+        font-size: 28px;
+        letter-spacing: 6px;
+        padding: 15px;
+    }
+    
+    .cobro-facil-entry-result {
+        padding: 30px 20px;
+    }
+    
+    .cobro-facil-cover {
+        margin: -30px -20px 20px -20px;
+    }
+}
