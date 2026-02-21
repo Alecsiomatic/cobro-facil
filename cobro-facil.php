@@ -3,7 +3,7 @@
  * Plugin Name:       Cobro Fácil
  * Plugin URI:        https://github.com/Alecsiomatic/cobro-facil
  * Description:       Sistema de acceso seguro a entradas con código de 6 dígitos y envío por WhatsApp.
- * Version:           2.4.0
+ * Version:           2.5.0
  * Author:            Alecsiomatic
  * Author URI:        https://github.com/Alecsiomatic
  * License:           GPL-2.0+
@@ -23,7 +23,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-define( 'COBRO_FACIL_VERSION', '2.4.0' );
+define( 'COBRO_FACIL_VERSION', '2.5.0' );
 define( 'COBRO_FACIL_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'COBRO_FACIL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -544,10 +544,11 @@ function cobro_facil_thankyou_content( $order_id ) {
     $phone = $order->get_billing_phone();
     $access_url = site_url( '/mi-entrada' );
     
-    // Mensaje para WhatsApp
-    $whatsapp_message = "🎟️ *Ticket to Ride - Mi Entrada*\n\n";
-    $whatsapp_message .= "Tu código de acceso: *{$code}*\n\n";
-    $whatsapp_message .= "📱 Accede a tu entrada aquí:\n{$access_url}\n\n";
+    // Mensaje para WhatsApp (con saltos de línea correctos)
+    $whatsapp_message = "🎟️ *Ticket to Ride - Mi Entrada*" . "\n\n";
+    $whatsapp_message .= "Tu código de acceso: *{$code}*" . "\n\n";
+    $whatsapp_message .= "📱 Accede a tu entrada aquí:" . "\n";
+    $whatsapp_message .= $access_url . "\n\n";
     $whatsapp_message .= "Guarda este mensaje para acceder a tu QR cuando lo necesites.";
     
     // Formatear número para wa.me (quitar espacios, guiones, etc)
@@ -587,7 +588,8 @@ function cobro_facil_thankyou_content( $order_id ) {
     </div>
     <?php
 }
-add_action( 'woocommerce_thankyou', 'cobro_facil_thankyou_content', 15 );
+// Prioridad 1 para mostrar ANTES del QR de QRCompleto (que usa prioridad 10)
+add_action( 'woocommerce_thankyou', 'cobro_facil_thankyou_content', 1 );
 
 // =============================================================================
 // 3. SHORTCODE PARA PÁGINA DE ACCESO [mi_entrada]
