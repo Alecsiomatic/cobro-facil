@@ -3,7 +3,7 @@
  * Plugin Name:       Cobro Fácil
  * Plugin URI:        https://github.com/Alecsiomatic/cobro-facil
  * Description:       Personaliza y mejora el checkout de WooCommerce para una experiencia de pago más sencilla.
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:            Alecsiomatic
  * Author URI:        https://github.com/Alecsiomatic
  * License:           GPL-2.0+
@@ -12,8 +12,6 @@
  * Domain Path:       /languages
  * Requires at least: 5.0
  * Requires PHP:      7.4
- * WC requires at least: 5.0
- * WC tested up to:   8.0
  *
  * GitHub Plugin URI: Alecsiomatic/cobro-facil
  * GitHub Plugin URI: https://github.com/Alecsiomatic/cobro-facil
@@ -26,66 +24,59 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-/**
- * Versión actual del plugin.
- */
-define( 'COBRO_FACIL_VERSION', '1.0.0' );
-define( 'COBRO_FACIL_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'COBRO_FACIL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'COBRO_FACIL_VERSION', '1.0.1' );
 
 /**
- * Verificar que WooCommerce esté activo.
+ * Agregar menú en el admin.
  */
-function cobro_facil_check_woocommerce() {
-    if ( ! class_exists( 'WooCommerce' ) ) {
-        add_action( 'admin_notices', 'cobro_facil_woocommerce_missing_notice' );
-        return false;
-    }
-    return true;
+function cobro_facil_admin_menu() {
+    add_menu_page(
+        'Cobro Fácil',           // Título de la página
+        'Cobro Fácil',           // Título del menú
+        'manage_options',        // Capacidad requerida
+        'cobro-facil',           // Slug del menú
+        'cobro_facil_admin_page', // Función callback
+        'dashicons-cart',        // Icono
+        30                       // Posición
+    );
 }
+add_action( 'admin_menu', 'cobro_facil_admin_menu' );
 
 /**
- * Aviso de WooCommerce faltante.
+ * Página del admin.
  */
-function cobro_facil_woocommerce_missing_notice() {
+function cobro_facil_admin_page() {
     ?>
-    <div class="notice notice-error">
-        <p><?php esc_html_e( 'Cobro Fácil requiere WooCommerce para funcionar. Por favor, instala y activa WooCommerce.', 'cobro-facil' ); ?></p>
+    <div class="wrap">
+        <h1>🎉 Cobro Fácil</h1>
+        <div class="notice notice-success" style="padding: 20px; margin-top: 20px;">
+            <h2 style="margin-top: 0;">✅ Plugin instalado exitosamente</h2>
+            <p>Versión: <?php echo COBRO_FACIL_VERSION; ?></p>
+            <p>El plugin está activo y funcionando correctamente.</p>
+        </div>
     </div>
     <?php
 }
 
 /**
- * Inicializar el plugin.
+ * Mostrar aviso de activación.
  */
-function cobro_facil_init() {
-    if ( ! cobro_facil_check_woocommerce() ) {
-        return;
+function cobro_facil_activation_notice() {
+    if ( get_transient( 'cobro_facil_activated' ) ) {
+        ?>
+        <div class="notice notice-success is-dismissible">
+            <p><strong>Cobro Fácil</strong> ha sido instalado exitosamente. <a href="<?php echo admin_url( 'admin.php?page=cobro-facil' ); ?>">Ir a la configuración</a></p>
+        </div>
+        <?php
+        delete_transient( 'cobro_facil_activated' );
     }
-
-    // Cargar archivos del plugin
-    require_once COBRO_FACIL_PLUGIN_DIR . 'includes/class-cobro-facil-checkout.php';
-
-    // Inicializar la clase principal
-    $checkout = new Cobro_Facil_Checkout();
-    $checkout->init();
 }
-add_action( 'plugins_loaded', 'cobro_facil_init' );
+add_action( 'admin_notices', 'cobro_facil_activation_notice' );
 
 /**
  * Activación del plugin.
  */
 function cobro_facil_activate() {
-    // Código de activación aquí
-    flush_rewrite_rules();
+    set_transient( 'cobro_facil_activated', true, 30 );
 }
 register_activation_hook( __FILE__, 'cobro_facil_activate' );
-
-/**
- * Desactivación del plugin.
- */
-function cobro_facil_deactivate() {
-    // Código de desactivación aquí
-    flush_rewrite_rules();
-}
-register_deactivation_hook( __FILE__, 'cobro_facil_deactivate' );
