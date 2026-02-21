@@ -3,7 +3,7 @@
  * Plugin Name:       Cobro Fácil
  * Plugin URI:        https://github.com/Alecsiomatic/cobro-facil
  * Description:       Sistema de acceso seguro a entradas con código de 6 dígitos y envío por WhatsApp.
- * Version:           2.2.0
+ * Version:           2.3.0
  * Author:            Alecsiomatic
  * Author URI:        https://github.com/Alecsiomatic
  * License:           GPL-2.0+
@@ -23,7 +23,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-define( 'COBRO_FACIL_VERSION', '2.2.0' );
+define( 'COBRO_FACIL_VERSION', '2.3.0' );
 define( 'COBRO_FACIL_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'COBRO_FACIL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -120,7 +120,7 @@ function cobro_facil_generate_guest_email( $data, $errors ) {
 add_action( 'woocommerce_after_checkout_validation', 'cobro_facil_generate_guest_email', 10, 2 );
 
 /**
- * Estilos adicionales para checkout simplificado.
+ * Estilos y JS para checkout simplificado.
  * Funciona tanto en checkout clásico como en checkout de bloques.
  */
 function cobro_facil_checkout_styles() {
@@ -128,84 +128,52 @@ function cobro_facil_checkout_styles() {
         ?>
         <style>
             /* =============================================
-               CHECKOUT DE BLOQUES (WooCommerce Blocks)
+               CHECKOUT DE BLOQUES - Ocultar campos específicos
                ============================================= */
             
-            /* Ocultar sección de email/contacto completa */
-            .wc-block-checkout__contact-fields,
+            /* Ocultar sección de contacto/email */
             .wp-block-woocommerce-checkout-contact-information-block,
-            .wc-block-components-checkout-step:has(.wc-block-components-text-input input[type="email"]) {
+            .wc-block-checkout__contact-fields {
                 display: none !important;
             }
             
-            /* Ocultar TODOS los campos de dirección en bloques */
-            .wc-block-checkout__billing-fields .wc-block-components-address-form > *:not(:first-child):not(:nth-child(2)),
-            .wc-block-checkout__billing-fields .wc-block-components-country-input,
-            .wc-block-checkout__billing-fields .wc-block-components-state-input,
-            .wc-block-checkout__billing-fields [id*="billing-address"],
-            .wc-block-checkout__billing-fields [id*="billing-city"],
-            .wc-block-checkout__billing-fields [id*="billing-state"],
-            .wc-block-checkout__billing-fields [id*="billing-postcode"],
-            .wc-block-checkout__billing-fields [id*="billing-country"],
-            .wc-block-checkout__billing-fields [id*="billing-company"],
-            .wc-block-checkout__billing-fields [id*="last-name"],
-            .wc-block-checkout__billing-fields [id*="address_1"],
-            .wc-block-checkout__billing-fields [id*="address_2"],
+            /* Ocultar campos específicos en billing */
+            .wc-block-components-address-form__last_name,
+            .wc-block-components-address-form__company,
             .wc-block-components-address-form__address_1,
             .wc-block-components-address-form__address_2,
             .wc-block-components-address-form__city,
             .wc-block-components-address-form__state,
             .wc-block-components-address-form__postcode,
-            .wc-block-components-address-form__country,
-            .wc-block-components-address-form__company,
-            .wc-block-components-address-form__last_name {
+            .wc-block-components-address-form__country {
                 display: none !important;
             }
             
-            /* Ocultar específicamente por class parcial */
-            [class*="address_1"],
-            [class*="address_2"],
-            [class*="address-line"],
-            [class*="city"],
-            [class*="postcode"],
-            [class*="postal-code"],
-            [class*="country"],
-            [class*="state"],
-            [class*="company"],
-            [class*="last-name"],
-            [class*="last_name"],
-            [class*="email"] {
-                display: none !important;
-            }
-            
-            /* Mostrar solo nombre y teléfono */
-            [class*="first-name"],
-            [class*="first_name"],
-            [class*="phone"] {
-                display: block !important;
-            }
-            
-            /* Ocultar shipping */
-            .wc-block-checkout__shipping-fields,
+            /* Ocultar shipping completo */
             .wp-block-woocommerce-checkout-shipping-address-block,
+            .wc-block-checkout__shipping-fields,
             .wc-block-checkout__shipping-option,
-            .wc-block-components-shipping-address,
-            #shipping-fields,
-            .wc-block-checkout__actions-row [class*="shipping"],
-            [id*="shipping"] {
+            .wp-block-woocommerce-checkout-shipping-method-block,
+            .wp-block-woocommerce-checkout-shipping-methods-block {
                 display: none !important;
             }
             
-            /* Ocultar notas del pedido */
-            .wc-block-checkout__add-note,
-            .wc-block-components-checkout-order-note,
-            [class*="order-note"],
-            [class*="order-comments"] {
+            /* Ocultar notas */
+            .wp-block-woocommerce-checkout-order-note-block,
+            .wc-block-checkout__add-note {
                 display: none !important;
+            }
+            
+            /* MOSTRAR nombre y teléfono con alta prioridad */
+            .wc-block-components-address-form__first_name,
+            .wc-block-components-address-form__phone {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
             }
             
             /* =============================================
-               CHECKOUT CLÁSICO (Shortcode)
+               CHECKOUT CLÁSICO - Ocultar campos específicos
                ============================================= */
             
             #billing_email_field,
@@ -224,88 +192,123 @@ function cobro_facil_checkout_styles() {
                 display: none !important;
             }
             
-            /* Campos visibles - estilo mejorado */
+            /* MOSTRAR nombre y teléfono en clásico */
             #billing_first_name_field,
-            #billing_phone_field,
-            .wc-block-components-text-input:has([id*="first-name"]),
-            .wc-block-components-text-input:has([id*="phone"]) {
+            #billing_phone_field {
                 display: block !important;
             }
             
-            /* Estilo para los campos en checkout clásico */
+            /* Estilos bonitos para campos */
+            .wc-block-components-text-input input,
             .woocommerce-checkout #billing_first_name,
             .woocommerce-checkout #billing_phone {
-                padding: 15px;
-                font-size: 16px;
-                border-radius: 10px;
-                border: 2px solid #e0e0e0;
+                padding: 15px !important;
+                font-size: 16px !important;
+                border-radius: 10px !important;
+                border: 2px solid #e0e0e0 !important;
             }
             
+            .wc-block-components-text-input input:focus,
             .woocommerce-checkout #billing_first_name:focus,
             .woocommerce-checkout #billing_phone:focus {
-                border-color: #667eea;
-                outline: none;
+                border-color: #667eea !important;
+                outline: none !important;
             }
         </style>
         
         <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Función para ocultar campos no deseados (más agresivo)
-            function hideUnwantedFields() {
-                // Selectores de campos a ocultar
-                var hideSelectors = [
-                    '[id*="email"]',
-                    '[id*="last-name"]', '[id*="last_name"]',
-                    '[id*="address"]', '[id*="address_1"]', '[id*="address_2"]',
-                    '[id*="city"]',
-                    '[id*="state"]',
-                    '[id*="postcode"]', '[id*="postal"]',
-                    '[id*="country"]',
-                    '[id*="company"]',
-                    '[class*="shipping"]',
-                    '[class*="address_1"]', '[class*="address_2"]',
-                    '[class*="city"]', '[class*="postcode"]',
-                    '[class*="country"]', '[class*="state"]',
-                    '[class*="company"]', '[class*="last"]',
-                    '.wc-block-checkout__contact-fields',
-                    '.wc-block-components-checkout-order-note'
+        (function() {
+            function setupCheckoutFields() {
+                // Lista de campos a OCULTAR
+                var fieldsToHide = [
+                    'email', 'last_name', 'last-name', 'company', 
+                    'address_1', 'address_2', 'address-1', 'address-2',
+                    'city', 'state', 'postcode', 'country', 'postal'
                 ];
                 
-                hideSelectors.forEach(function(selector) {
-                    document.querySelectorAll(selector).forEach(function(el) {
-                        // No ocultar si es nombre o teléfono
-                        var id = el.id || '';
-                        var className = el.className || '';
-                        if (id.includes('first') || id.includes('phone') ||
-                            className.includes('first') || className.includes('phone')) {
-                            return;
+                // Lista de campos a MOSTRAR (nunca ocultar estos)
+                var fieldsToShow = ['first_name', 'first-name', 'phone'];
+                
+                // Función para verificar si un elemento debe mostrarse
+                function shouldShow(el) {
+                    var id = (el.id || '').toLowerCase();
+                    var className = (el.className || '').toLowerCase();
+                    var text = id + ' ' + className;
+                    
+                    for (var i = 0; i < fieldsToShow.length; i++) {
+                        if (text.indexOf(fieldsToShow[i]) !== -1) {
+                            return true;
                         }
-                        // Buscar el contenedor padre del campo
-                        var parent = el.closest('.wc-block-components-text-input') || 
-                                     el.closest('.form-row') ||
-                                     el.closest('.wc-block-components-checkout-step') ||
-                                     el;
-                        if (parent) {
-                            parent.style.display = 'none';
+                    }
+                    return false;
+                }
+                
+                // Función para verificar si debe ocultarse
+                function shouldHide(el) {
+                    var id = (el.id || '').toLowerCase();
+                    var className = (el.className || '').toLowerCase();
+                    var text = id + ' ' + className;
+                    
+                    for (var i = 0; i < fieldsToHide.length; i++) {
+                        if (text.indexOf(fieldsToHide[i]) !== -1) {
+                            return true;
                         }
+                    }
+                    return false;
+                }
+                
+                // Procesar todos los inputs y sus contenedores
+                var allInputs = document.querySelectorAll('.wc-block-components-text-input, .form-row, .wc-block-components-country-input, .wc-block-components-state-input');
+                
+                allInputs.forEach(function(container) {
+                    if (shouldShow(container)) {
+                        container.style.display = 'block';
+                        container.style.visibility = 'visible';
+                    } else if (shouldHide(container)) {
+                        container.style.display = 'none';
+                    }
+                });
+                
+                // Ocultar secciones completas
+                var sectionsToHide = [
+                    '.wp-block-woocommerce-checkout-contact-information-block',
+                    '.wc-block-checkout__contact-fields',
+                    '.wp-block-woocommerce-checkout-shipping-address-block',
+                    '.wc-block-checkout__shipping-fields',
+                    '.wp-block-woocommerce-checkout-order-note-block',
+                    '.wc-block-checkout__add-note'
+                ];
+                
+                sectionsToHide.forEach(function(selector) {
+                    var elements = document.querySelectorAll(selector);
+                    elements.forEach(function(el) {
+                        el.style.display = 'none';
                     });
                 });
             }
             
-            // Ejecutar inmediatamente
-            hideUnwantedFields();
-            
-            // Ejecutar cada segundo por si WooCommerce regenera campos
-            setInterval(hideUnwantedFields, 1000);
-            
-            // Observer para detectar cambios en el DOM
-            var observer = new MutationObserver(hideUnwantedFields);
-            var checkoutForm = document.querySelector('.wc-block-checkout') || 
-                               document.querySelector('.woocommerce-checkout');
-            if (checkoutForm) {
-                observer.observe(checkoutForm, { childList: true, subtree: true });
+            // Ejecutar cuando el DOM esté listo
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', setupCheckoutFields);
+            } else {
+                setupCheckoutFields();
             }
-        });
+            
+            // Ejecutar periódicamente para React/bloques
+            setInterval(setupCheckoutFields, 500);
+            
+            // Observer para cambios dinámicos
+            var observer = new MutationObserver(function() {
+                setTimeout(setupCheckoutFields, 100);
+            });
+            
+            setTimeout(function() {
+                var checkout = document.querySelector('.wc-block-checkout, .woocommerce-checkout');
+                if (checkout) {
+                    observer.observe(checkout, { childList: true, subtree: true });
+                }
+            }, 1000);
+        })();
         </script>
         <?php
     }
